@@ -1,0 +1,104 @@
+---
+import Base from '../../layouts/Base.astro';
+import FecTool from '../../components/FecTool.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import Faq from '../../components/Faq.astro';
+import ToolCards from '../../components/ToolCards.astro';
+import { breadcrumbSchema, faqSchema, href, toolSchema, type FaqItem } from '../../site';
+
+const site = Astro.site!;
+const crumbs = [
+  { name: 'Accueil', path: '/' },
+  { name: 'Valider un FEC', path: '/valider-fec/' },
+];
+const faq: FaqItem[] = [
+  {
+    q: 'Un FEC « valide » ici est-il forcément accepté par l’administration ?',
+    a: '<p>Non, et aucun outil ne peut le garantir. Les contrôles de format suivent l’article A. 47 A-1 du LPF ; ceux de contenu repèrent les incohérences les plus courantes. Pour une vérification officielle de la structure, passez aussi le fichier dans Test Compta Démat, et faites relire les points d’attention par votre expert-comptable.</p>',
+  },
+  {
+    q: 'Une rupture de numérotation est-elle grave ?',
+    a: '<p>La doctrine demande une numérotation « sans rupture ni inversion ». Un trou n’est pas une fraude en soi (une écriture de brouillard supprimée, par exemple), mais il faut pouvoir l’expliquer. Mieux vaut le savoir avant que le vérificateur ne pose la question.</p>',
+  },
+  {
+    q: 'Pourquoi la caisse négative est-elle signalée ?',
+    a: '<p>Une caisse physique ne peut pas contenir moins de zéro euro. Un solde créditeur, même un seul jour, laisse supposer que des recettes en espèces n’ont pas été enregistrées, ou que les écritures ne sont pas datées du bon jour. C’est un point classique des contrôles dans les commerces.</p>',
+  },
+  {
+    q: 'Les écritures du dimanche sont-elles interdites ?',
+    a: '<p>Non. Elles sont seulement listées, à titre d’information : c’est un tri fréquent lors de l’analyse d’un FEC, et une écriture de caisse un jour de fermeture mérite une explication. Pour un site de vente en ligne ou un commerce ouvert le dimanche, c’est normal.</p>',
+  },
+];
+---
+<Base
+  title="Valider un FEC avant un contrôle fiscal : vérificateur gratuit"
+  description="Vérifiez votre FEC avant de le remettre : format A47 A-1, 18 champs, équilibre, numérotation, dates hors exercice, caisse négative. Gratuit, sans envoi de fichier."
+  keywords={["valider fec", "vérifier fec", "validateur fec", "contrôle fec", "fec conforme", "fec non conforme", "test compta démat alternative", "fec contrôle fiscal", "anomalies fec", "rupture numérotation fec", "fec déséquilibré", "vérification fichier écritures comptables"]}
+  schema={[
+    toolSchema(site, { name: 'Validateur de FEC', path: '/valider-fec/', description: 'Contrôle la conformité et la cohérence d’un Fichier des Écritures Comptables.' }),
+    breadcrumbSchema(site, crumbs),
+    faqSchema(faq),
+  ]}
+>
+  <Crumbs items={crumbs} />
+  <section class="hero wrap">
+    <h1>Valider un FEC avant un contrôle fiscal</h1>
+    <p class="lead">
+      L’administration vous demande votre FEC, ou votre expert-comptable vient de vous l’envoyer ? Vérifiez-le en une minute :
+      chaque anomalie est expliquée, avec les numéros de ligne concernés.
+    </p>
+  </section>
+
+  <div class="wrap">
+    <FecTool focus="controles" label="Déposez le FEC à valider" />
+
+    <article class="prose narrow section">
+      <h2>Les contrôles, un par un</h2>
+      <h3>Le fichier lui-même</h3>
+      <ul>
+        <li><strong>Le nom</strong> doit suivre la forme <code>SirenFECAAAAMMJJ</code>, avec la date de clôture de l’exercice. L’outil vérifie aussi la clé du SIREN.</li>
+        <li><strong>Le séparateur</strong> doit être une tabulation ou le caractère « | ». Un CSV au point-virgule, très courant, n’est pas conforme.</li>
+        <li><strong>L’encodage</strong> autorisé : ASCII, ISO 8859-15 ou UTF-8.</li>
+        <li><strong>L’en-tête</strong> doit contenir les 18 champs, avec leur nom exact. <code>CompteAuxNum</code> au lieu de <code>CompAuxNum</code> est une erreur fréquente.</li>
+      </ul>
+      <h3>Le format des données</h3>
+      <ul>
+        <li>Dates au format <code>AAAAMMJJ</code>, sans séparateur.</li>
+        <li>Montants avec une virgule décimale et <strong>sans séparateur de milliers</strong> : <code>15000,00</code> et non <code>15 000,00</code>.</li>
+        <li>Champs obligatoires renseignés, y compris la référence et la date de pièce, même pour les à-nouveaux.</li>
+        <li>Toutes les lignes ont le même nombre de colonnes que l’en-tête (un « | » dans un libellé suffit à tout décaler).</li>
+      </ul>
+      <h3>Les écritures</h3>
+      <ul>
+        <li><strong>Équilibre</strong> de chaque écriture et du fichier entier.</li>
+        <li><strong>Numérotation</strong> croissante, chronologique et sans rupture, qu’elle soit globale ou propre à chaque journal.</li>
+        <li><strong>Dates</strong> dans l’exercice, validation postérieure à la comptabilisation.</li>
+        <li><strong>À-nouveaux</strong> présents en début d’exercice.</li>
+      </ul>
+      <h3>Les points d’attention</h3>
+      <p>
+        Ce ne sont pas des erreurs de format, mais des éléments que l’on regarde systématiquement quand on analyse un FEC :
+        solde de caisse négatif, comptes qui ne suivent pas le plan comptable, écritures datées d’un dimanche ou d’un jour férié,
+        lignes en double, comptes portant plusieurs libellés.
+      </p>
+      <p>
+        Chacun est détaillé dans le guide <a href={href('/guides/anomalies-fec-controle-fiscal/')}>les anomalies FEC à corriger</a>,
+        et la méthode complète dans <a href={href('/guides/verifier-fec-avant-controle-fiscal/')}>vérifier son FEC avant un contrôle</a>.
+      </p>
+
+      <h2>Et ensuite ?</h2>
+      <p>
+        Les erreurs de format se corrigent dans le paramétrage de l’export du logiciel comptable, pas en retouchant le fichier à la main :
+        un FEC modifié dans un tableur perd souvent ses zéros, ses dates ou son encodage. Pour les points d’attention, préparez une explication
+        écrite. Le rapport complet des contrôles est inclus dans l’<a href={href('/ouvrir-fec-excel/')}>export Excel</a>, onglet « Contrôles ».
+      </p>
+    </article>
+
+    <Faq items={faq} />
+
+    <section class="section">
+      <h2>Les autres usages</h2>
+      <ToolCards exclude="/valider-fec/" />
+    </section>
+  </div>
+</Base>

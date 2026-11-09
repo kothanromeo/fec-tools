@@ -1,0 +1,20 @@
+---
+import { href } from '../site';
+interface Props {
+  exclude?: string;
+}
+const { exclude } = Astro.props;
+const tools = [
+  { path: '/', title: 'Lire un FEC', text: 'Synthèse de l’exercice, balance, journaux et recherche dans les écritures, comme un logiciel comptable.' },
+  { path: '/valider-fec/', title: 'Valider un FEC', text: 'Format de l’article A. 47 A-1, équilibre, numérotation, dates, caisse : les contrôles avant de remettre le fichier.' },
+  { path: '/ouvrir-fec-excel/', title: 'Ouvrir un FEC dans Excel', text: 'Un classeur propre avec écritures, balance, journaux et rapport de contrôle, prêt pour un tableau croisé dynamique.' },
+].filter((t) => t.path !== exclude);
+---
+<div class="grid-3">
+  {tools.map((t) => (
+    <a class="card tool-card" href={href(t.path)}>
+      <h3>{t.title}</h3>
+      <p>{t.text}</p>
+    </a>
+  ))}
+</div>

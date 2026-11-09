@@ -1,0 +1,98 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import FecTool from '../components/FecTool.astro';
+import ToolCards from '../components/ToolCards.astro';
+import Faq from '../components/Faq.astro';
+import { faqSchema, href, toolSchema, type FaqItem } from '../site';
+
+const site = Astro.site!;
+const posts = (await getCollection('guides')).sort((a, b) => +b.data.published - +a.data.published);
+
+const faq: FaqItem[] = [
+  {
+    q: 'Qu’est-ce qu’un FEC ?',
+    a: '<p>Le Fichier des Écritures Comptables regroupe toutes les écritures d’un exercice dans un seul fichier texte, une ligne par mouvement, avec 18 informations obligatoires (journal, numéro d’écriture, date, compte, pièce, libellé, débit, crédit…). Toute entreprise qui tient une comptabilité informatisée doit pouvoir le remettre à l’administration fiscale lors d’un contrôle.</p>',
+  },
+  {
+    q: 'Ma comptabilité est-elle envoyée sur un serveur ?',
+    a: '<p>Non. Le site est statique et l’analyse tourne dans votre navigateur, dans un processus séparé de la page (Web Worker). Le fichier n’est jamais transmis : vous pouvez couper votre connexion après le chargement de la page, l’outil fonctionne toujours.</p>',
+  },
+  {
+    q: 'Quelle différence avec Test Compta Démat ?',
+    a: '<p>Test Compta Démat, le logiciel gratuit de la DGFiP, vérifie que le fichier respecte la norme : structure, champs, formats. Il ne juge pas le contenu. FEC Tools fait ces contrôles de forme, puis regarde le fond : équilibre de chaque écriture, ruptures de numérotation, dates hors exercice, caisse négative, écritures du dimanche. Les deux sont complémentaires.</p>',
+  },
+  {
+    q: 'Le FEC de mon logiciel fait 200 Mo, ça passe ?',
+    a: '<p>Oui, dans la limite de la mémoire de votre ordinateur. L’analyse se fait en arrière-plan sans figer la page : comptez quelques secondes pour 300 000 lignes. Seul l’affichage des écritures est limité à 500 lignes à la fois ; les exports contiennent tout.</p>',
+  },
+  {
+    q: 'Les FEC des BNC et des exploitants agricoles sont-ils reconnus ?',
+    a: '<p>Oui. L’outil détecte la variante : 18 champs standard, Montant et Sens au lieu de Débit et Crédit, 21 champs pour les bénéfices agricoles et 22 champs pour les BNC en comptabilité de trésorerie (date et mode de règlement, nature de l’opération, identifiant client).</p>',
+  },
+];
+---
+<Base
+  title="Lire et vérifier un FEC en ligne (Fichier des Écritures Comptables)"
+  description="Ouvrez et contrôlez gratuitement un Fichier des Écritures Comptables : format A47 A-1, équilibre, numérotation, balance et export Excel. Votre comptabilité reste sur votre ordinateur."
+  keywords={["fec", "fichier des écritures comptables", "lire fichier fec", "ouvrir fec", "lecteur fec en ligne", "vérifier fec", "contrôle fec gratuit", "fec article a47 a-1", "fec contrôle fiscal", "fec excel", "balance fec", "analyse fec", "test compta démat en ligne"]}
+  schema={[toolSchema(site, { name: 'Lecteur et validateur de FEC', path: '/', description: 'Lit et contrôle un Fichier des Écritures Comptables dans le navigateur.' }), faqSchema(faq)]}
+>
+  <section class="hero wrap">
+    <h1>Lire et vérifier un FEC en ligne</h1>
+    <p class="lead">
+      Déposez le Fichier des Écritures Comptables exporté par votre logiciel : vous obtenez la synthèse de l’exercice, la balance,
+      les journaux, et la liste de tout ce qu’un contrôle pourrait vous reprocher. Sans installation, sans compte, sans envoi du fichier.
+    </p>
+    <ul class="badges">
+      <li>100 % dans le navigateur</li>
+      <li>Article A. 47 A-1 du LPF</li>
+      <li>BIC, IS, BNC, BA</li>
+      <li>Gratuit et open source</li>
+    </ul>
+  </section>
+
+  <div class="wrap">
+    <FecTool />
+
+    <section class="section">
+      <h2>Trois usages, un même outil</h2>
+      <ToolCards exclude="/" />
+    </section>
+
+    <section class="section two-col">
+      <div>
+        <h2>Pourquoi vérifier son FEC</h2>
+        <p>
+          Lors d’un contrôle fiscal, le FEC est l’une des premières pièces demandées. Un fichier non remis ou non conforme expose à une amende
+          de 5 000 €, ou de 10 % des droits rappelés si c’est plus élevé (article 1729 D du CGI), et surtout à une analyse de toute la comptabilité sous un mauvais jour.
+        </p>
+        <p>
+          Les problèmes les plus fréquents ne sont pas des fraudes : un séparateur incorrect, un champ vide, une numérotation avec des trous
+          après une suppression, des écritures de caisse saisies dans le désordre. Ils se corrigent facilement, à condition de les voir avant.
+          Le guide <a href={href('/guides/anomalies-fec-controle-fiscal/')}>des anomalies FEC</a> les passe en revue.
+        </p>
+      </div>
+      <div>
+        <h2>Ce que l’outil contrôle</h2>
+        <ul>
+          <li><strong>Le fichier</strong> : nom SirenFECAAAAMMJJ, séparateur, encodage, en-tête et ses 18 champs.</li>
+          <li><strong>Le format</strong> : dates AAAAMMJJ, montants à virgule sans séparateur de milliers, champs obligatoires renseignés.</li>
+          <li><strong>Les écritures</strong> : équilibre de chacune et du fichier, numérotation continue et chronologique, dates dans l’exercice, à-nouveaux.</li>
+          <li><strong>Les points d’attention</strong> : solde de caisse négatif, comptes hors plan comptable, écritures du dimanche et des jours fériés, doublons.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Les guides</h2>
+      <ul class="post-list">
+        {posts.map((p) => (
+          <li class="card"><a href={href(`/guides/${p.id}/`)}><h3>{p.data.title}</h3><p>{p.data.description}</p></a></li>
+        ))}
+      </ul>
+    </section>
+
+    <Faq items={faq} />
+  </div>
+</Base>

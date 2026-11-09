@@ -1,0 +1,52 @@
+---
+import Base from '../../layouts/Base.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import { SITE, breadcrumbSchema } from '../../site';
+
+const crumbs = [
+  { name: 'Accueil', path: '/' },
+  { name: 'À propos', path: '/a-propos/' },
+];
+const person = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: SITE.author,
+  url: SITE.authorUrl,
+  sameAs: [SITE.linkedin, SITE.instagram, SITE.portfolio, SITE.authorUrl],
+  jobTitle: 'Développeur',
+};
+---
+<Base
+  keywords={["fec tools", "roméo kothan", "lecteur fec open source", "validateur fec gratuit", "développeur"]}
+  title="À propos du projet"
+  description="FEC Tools est un projet open source de Roméo Kothan : un lecteur et validateur gratuit de FEC, qui fonctionne sans envoyer votre comptabilité."
+  schema={[person, breadcrumbSchema(Astro.site!, crumbs)]}
+>
+  <Crumbs items={crumbs} />
+  <article class="wrap narrow prose" style="padding-top:1.5rem">
+    <h1>À propos</h1>
+    <p>
+      Je m’appelle {SITE.author}, je suis développeur. Le FEC contient toute la comptabilité d’une entreprise : chaque vente, chaque achat,
+      chaque salaire. Pour le vérifier, on avait le choix entre un logiciel officiel à installer, qui ne contrôle que la forme, et des services
+      en ligne à qui il faut confier ce fichier. J’ai voulu un outil qui contrôle aussi le fond, sans jamais voir les données.
+    </p>
+    <h2>Les principes</h2>
+    <ul>
+      <li><strong>Rien ne sort de votre navigateur.</strong> Le site est statique ; l’analyse tourne dans un Web Worker, sur votre ordinateur.</li>
+      <li><strong>Le code est public</strong>, sous licence MIT : n’importe qui peut vérifier ce qu’il fait.</li>
+      <li><strong>Les contrôles sont sourcés.</strong> Ceux de format suivent l’article A. 47 A-1 du Livre des procédures fiscales et la doctrine BOI-CF-IOR-60-40-20.</li>
+      <li><strong>Pas de promesse excessive.</strong> L’outil aide à repérer les problèmes ; il ne remplace ni votre expert-comptable, ni le logiciel officiel de la DGFiP.</li>
+    </ul>
+    <h2>Sous le capot</h2>
+    <p>
+      Astro pour le site, TypeScript sans framework côté client, un Web Worker pour analyser des fichiers de plusieurs centaines de milliers de lignes
+      sans figer la page, et un export Excel écrit directement au format Office Open XML. Le tout est couvert par des tests automatiques.
+    </p>
+    <h2>Contribuer, signaler un problème</h2>
+    <p>
+      Un FEC mal lu, un contrôle à ajouter, une erreur dans un guide ? Ouvrez une <a href={`${SITE.repo}/issues`} rel="noopener">issue sur GitHub</a>.
+      Ne joignez jamais un vrai FEC : remplacez d’abord les noms, les montants et les numéros.
+    </p>
+    <p>Vous pouvez aussi me retrouver sur <a href={SITE.linkedin} rel="me noopener">LinkedIn</a>.</p>
+  </article>
+</Base>

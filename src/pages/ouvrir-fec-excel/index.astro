@@ -1,0 +1,96 @@
+---
+import Base from '../../layouts/Base.astro';
+import FecTool from '../../components/FecTool.astro';
+import Crumbs from '../../components/Crumbs.astro';
+import Faq from '../../components/Faq.astro';
+import ToolCards from '../../components/ToolCards.astro';
+import { breadcrumbSchema, faqSchema, href, toolSchema, type FaqItem } from '../../site';
+
+const site = Astro.site!;
+const crumbs = [
+  { name: 'Accueil', path: '/' },
+  { name: 'Ouvrir un FEC dans Excel', path: '/ouvrir-fec-excel/' },
+];
+const faq: FaqItem[] = [
+  {
+    q: 'Pourquoi ne pas ouvrir le FEC directement dans Excel ?',
+    a: '<p>Excel essaie de deviner le type de chaque colonne : les numéros de compte comme <code>00012</code> perdent leurs zéros, les dates AAAAMMJJ deviennent des nombres, les montants à virgule sont parfois lus comme du texte selon les réglages régionaux, et les accents d’un fichier ISO 8859-15 s’affichent mal. Et surtout, si vous enregistrez par-dessus, le FEC n’est plus conforme.</p>',
+  },
+  {
+    q: 'Excel peut-il ouvrir un très gros FEC ?',
+    a: '<p>Une feuille Excel est limitée à 1 048 576 lignes. Au-delà, préférez la balance (CSV) ou filtrez par compte dans l’onglet « Écritures » de l’outil. En pratique, la grande majorité des PME restent très en dessous.</p>',
+  },
+  {
+    q: 'Puis-je modifier le classeur puis le renvoyer comme FEC ?',
+    a: '<p>Non. Le classeur est fait pour analyser, pas pour remplacer le FEC. Le fichier remis à l’administration doit être produit par le logiciel comptable, à partir des écritures validées.</p>',
+  },
+];
+---
+<Base
+  title="Ouvrir un FEC dans Excel : écritures, balance et grand livre"
+  description="Transformez un fichier FEC en classeur Excel propre : écritures, balance générale, journaux et rapport de contrôle. Comptes, dates et montants au bon format. Gratuit."
+  keywords={["ouvrir fec excel", "fec excel", "convertir fec en excel", "fec en xlsx", "importer fec dans excel", "balance à partir du fec", "grand livre fec", "fichier fec lire", "fec csv", "tableau croisé dynamique fec", "fec txt excel"]}
+  schema={[
+    toolSchema(site, { name: 'Convertisseur FEC vers Excel', path: '/ouvrir-fec-excel/', description: 'Transforme un FEC en classeur Excel : écritures, balance, journaux, contrôles.' }),
+    breadcrumbSchema(site, crumbs),
+    faqSchema(faq),
+  ]}
+>
+  <Crumbs items={crumbs} />
+  <section class="hero wrap">
+    <h1>Ouvrir un FEC dans Excel</h1>
+    <p class="lead">
+      Un FEC ouvert tel quel dans Excel, c’est des numéros de compte tronqués et des dates transformées en nombres.
+      Déposez-le ici pour obtenir un classeur propre, avec la balance et les journaux déjà calculés.
+    </p>
+  </section>
+
+  <div class="wrap">
+    <FecTool focus="balance" label="Déposez le FEC à ouvrir dans Excel" />
+
+    <article class="prose narrow section">
+      <h2>Le classeur obtenu</h2>
+      <p>L’export « Excel complet » contient quatre onglets :</p>
+      <ul>
+        <li><strong>Écritures</strong> : toutes les lignes du FEC, avec de vraies dates Excel, des montants numériques, une colonne de solde par ligne, un filtre et l’en-tête figé ;</li>
+        <li><strong>Balance</strong> : pour chaque compte, le total des débits et des crédits et le solde, réparti en débiteur ou créditeur ;</li>
+        <li><strong>Journaux</strong> : nombre d’écritures, totaux et période couverte par journal ;</li>
+        <li><strong>Contrôles</strong> : le rapport complet des vérifications, avec les exemples de lignes concernées.</li>
+      </ul>
+      <p>
+        Les numéros de compte restent du texte : <code>401000</code> et <code>0401</code> ne deviennent pas des nombres.
+        Les numéros d’écriture numériques, eux, sont convertis pour pouvoir être triés.
+      </p>
+
+      <h2>Trois analyses à faire en cinq minutes</h2>
+      <h3>Le chiffre d’affaires mois par mois</h3>
+      <p>
+        Dans l’onglet « Écritures », insérez un tableau croisé dynamique : la date en lignes (groupée par mois), le compte en filtre limité aux comptes
+        <code>70</code>, et la somme du crédit en valeurs. Vous obtenez la saisonnalité de l’activité.
+      </p>
+      <h3>Le grand livre d’un fournisseur</h3>
+      <p>
+        Filtrez la colonne « Compte auxiliaire » sur le fournisseur, ou dans l’outil, cliquez sur un compte de la balance : la liste de ses écritures
+        s’affiche avec le solde cumulé. Pratique pour retrouver une facture non réglée.
+      </p>
+      <h3>Les écritures manuelles importantes</h3>
+      <p>
+        Filtrez le journal des opérations diverses (souvent <code>OD</code>) et triez par montant décroissant. Les grosses écritures manuelles
+        sont celles qu’on vous demandera de justifier en priorité.
+      </p>
+
+      <h2>Pour aller plus loin</h2>
+      <p>
+        Le détail de chaque colonne du FEC est dans <a href={href('/guides/format-fec-18-champs/')}>le guide des 18 champs</a>.
+        Si le fichier présente des anomalies, la page <a href={href('/valider-fec/')}>valider un FEC</a> les explique.
+      </p>
+    </article>
+
+    <Faq items={faq} />
+
+    <section class="section">
+      <h2>Les autres usages</h2>
+      <ToolCards exclude="/ouvrir-fec-excel/" />
+    </section>
+  </div>
+</Base>
