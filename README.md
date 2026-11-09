@@ -19,7 +19,7 @@ FEC Tools fait les deux types de contrôle, forme et fond, directement dans le n
 
 ## Fonctionnalités
 
-- **Lecture** des FEC « à plat » : tabulation ou `|`, UTF-8 ou ISO 8859-15, variantes 18 champs, Montant/Sens, 21 champs (BA trésorerie) et 22 champs (BNC trésorerie).
+- **Lecture** des FEC « à plat » et **XML** (schémas officiels de la DGFiP) : tabulation ou `|`, UTF-8 ou ISO 8859-15, variantes 18 champs, Montant/Sens, 21 champs (BA trésorerie) et 22 champs (BNC trésorerie).
 - **Contrôles de format** selon l'article A. 47 A-1 du LPF : nom `SirenFECAAAAMMJJ` et clé du SIREN, séparateur, encodage, noms exacts des champs, dates `AAAAMMJJ`, montants (virgule, pas de séparateur de milliers), champs obligatoires, nombre de colonnes.
 - **Contrôles de cohérence** : équilibre de chaque écriture et du fichier, ruptures et inversions de numérotation (globale ou par journal), dates hors exercice, validation antérieure à la comptabilisation, à-nouveaux, solde de caisse négatif, comptes hors PCG, écritures des dimanches et jours fériés, doublons.
 - **Analyse** : synthèse de l'exercice et résultat calculé, balance générale, journaux, recherche dans les écritures et grand livre par compte avec solde cumulé.
@@ -53,7 +53,7 @@ npm run build   # site statique dans dist/
 
 ## Limites
 
-L'outil ne remplace ni Test Compta Démat pour la conformité officielle, ni l'avis d'un expert-comptable : un FEC conforme peut contenir des écritures fiscalement contestables. Le FEC au format XML n'est pas encore lu.
+L'outil ne remplace ni Test Compta Démat pour la conformité officielle, ni l'avis d'un expert-comptable : un FEC conforme peut contenir des écritures fiscalement contestables. Le FEC au format XML (schémas XSD de la DGFiP) est lu également.
 
 ## Contribuer
 

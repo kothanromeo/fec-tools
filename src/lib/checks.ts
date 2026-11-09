@@ -93,7 +93,15 @@ export function runChecks(p: ParsedFec): Check[] {
       add({ id: 'SIREN', group: 'Fichier', level: 'warning', title: `Le SIREN ${n.siren} du nom de fichier n’a pas une clé valide.`, detail: 'Le SIREN comporte 9 chiffres et une clé de contrôle (algorithme de Luhn). Vérifiez qu’il n’y a pas de faute de frappe.' });
     }
   }
-  add({
+  if (info.format === 'XML') {
+    add({ id: 'XML', group: 'Fichier', level: 'ok', title: `Format XML (schéma de l’article A. 47 A-1)${info.xmlClosingDate ? `, exercice clos le ${frd(info.xmlClosingDate)}` : ''}.` });
+    const structure = p.structure ?? [];
+    const errs = structure.filter((s) => s.severity === 'error');
+    const warns = structure.filter((s) => s.severity === 'warning');
+    if (errs.length) add({ id: 'XML-STRUCTURE', group: 'Fichier', level: 'error', title: `${errs.length} anomalie(s) de structure XML.`, samples: sample(errs.map((s) => `ligne ${s.line} · ${s.message}`)), count: errs.length });
+    else add({ id: 'XML-STRUCTURE', group: 'Fichier', level: 'ok', title: 'Structure XML conforme : comptabilite › exercice › journal › ecriture › ligne.' });
+    for (const w of warns) add({ id: 'XML-CLOTURE', group: 'Fichier', level: 'warning', title: w.message });
+  } else add({
     id: 'SEP', group: 'Fichier', level: info.separator === '\t' || info.separator === '|' ? 'ok' : 'error',
     title: info.separator === '\t' ? 'Séparateur : tabulation (conforme).' : info.separator === '|' ? 'Séparateur : « | » (conforme).' : `Séparateur « ${info.separator} » non autorisé.`,
     detail: info.separator === '\t' || info.separator === '|' ? undefined : 'L’article A. 47 A-1 n’autorise que la tabulation ou le caractère « | ». Un export CSV classique au point-virgule sera refusé.',
@@ -104,7 +112,9 @@ export function runChecks(p: ParsedFec): Check[] {
     detail: info.encoding === 'ISO 8859-15' ? 'Le fichier n’est pas en UTF-8 valide ; il a été lu en ISO 8859-15, encodage autorisé par la norme.' : undefined,
   });
   add({ id: 'VAR', group: 'Fichier', level: 'info', title: `Structure détectée : ${VARIANT_LABELS[info.variant]}.` });
-  if (info.missing.length) {
+  if (info.format === 'XML') {
+    // La présence des éléments est contrôlée champ par champ plus bas.
+  } else if (info.missing.length) {
     add({ id: 'CHAMPS', group: 'Fichier', level: 'error', title: `${info.missing.length} champ(s) obligatoire(s) absent(s) de l’en-tête : ${info.missing.join(', ')}.`, detail: 'Chaque champ doit être présent, même vide (« à blanc si non utilisé »).' });
   } else {
     add({ id: 'CHAMPS', group: 'Fichier', level: 'ok', title: 'Tous les champs obligatoires sont présents dans l’en-tête.' });
@@ -126,10 +136,11 @@ export function runChecks(p: ParsedFec): Check[] {
   const fc = p.formatIssueCount;
   const fmt = (problem: keyof typeof fc) => p.formatIssues.filter((i) => i.problem === problem).map((i) => `ligne ${i.line} · ${i.field} : « ${i.value} »`);
   if (fc.colonnes) add({ id: 'NB-COL', group: 'Format des données', level: 'error', title: `${fc.colonnes} ligne(s) n’ont pas le même nombre de colonnes que l’en-tête.`, samples: sample(fmt('colonnes')), count: fc.colonnes, detail: 'Cause fréquente : un séparateur (tabulation ou « | ») présent à l’intérieur d’un libellé.' });
-  if (fc.date) add({ id: 'DATES', group: 'Format des données', level: 'error', title: `${fc.date} date(s) invalides ou mal formatées.`, samples: sample(fmt('date')), count: fc.date, detail: 'Format attendu : AAAAMMJJ, sans séparateur (20251231).' });
+  if (fc.date) add({ id: 'DATES', group: 'Format des données', level: 'error', title: `${fc.date} date(s) invalides ou mal formatées.`, samples: sample(fmt('date')), count: fc.date, detail: info.format === 'XML' ? 'Format attendu en XML : AAAA-MM-JJ (2025-12-31) ou date-heure.' : 'Format attendu : AAAAMMJJ, sans séparateur (20251231).' });
   if (fc.montant) add({ id: 'MONTANTS', group: 'Format des données', level: 'error', title: `${fc.montant} montant(s) illisible(s).`, samples: sample(fmt('montant')), count: fc.montant });
   if (fc['point-decimal']) add({ id: 'DECIMALE', group: 'Format des données', level: 'warning', title: `${fc['point-decimal']} montant(s) avec un point décimal.`, samples: sample(fmt('point-decimal')), count: fc['point-decimal'], detail: 'La norme impose la virgule comme séparateur décimal (1234,56).' });
   if (fc['separateur-milliers']) add({ id: 'MILLIERS', group: 'Format des données', level: 'warning', title: `${fc['separateur-milliers']} montant(s) avec un séparateur de milliers.`, samples: sample(fmt('separateur-milliers')), count: fc['separateur-milliers'], detail: '« Aucun séparateur de millier n’est accepté » (A. 47 A-1, XII).' });
+  if (fc['virgule-xml']) add({ id: 'VIRGULE-XML', group: 'Format des données', level: 'warning', title: `${fc['virgule-xml']} montant(s) avec une virgule décimale.`, samples: sample(fmt('virgule-xml')), count: fc['virgule-xml'], detail: 'Dans le FEC XML, les montants sont de type xs:float : le séparateur décimal est le point (1234.56), contrairement au format texte.' });
   if (fc.sens) add({ id: 'SENS', group: 'Format des données', level: 'error', title: `${fc.sens} valeur(s) de Sens invalide(s).`, samples: sample(fmt('sens')), count: fc.sens, detail: 'Valeurs autorisées : D, C, +1 ou -1.' });
   if (!fc.colonnes && !fc.date && !fc.montant && !fc.sens) add({ id: 'FORMAT', group: 'Format des données', level: 'ok', title: 'Dates et montants au bon format.' });
 

@@ -8,11 +8,11 @@ const { focus = 'synthese', label = 'Déposez votre FEC (Fichier des Écritures 
 <section class="fec-tool" data-fec-tool data-focus={focus} aria-label="Lecteur et validateur de FEC">
   <div class="drop" data-drop>
     <p class="big">{label}</p>
-    <p>Fichier .txt ou .csv, du type <code>123456789FEC20251231.txt</code>. Glissez-déposez le fichier ici, ou</p>
+    <p>Fichier texte (.txt, .csv) ou XML, du type <code>123456789FEC20251231.txt</code>. Glissez-déposez le fichier ici, ou</p>
     <div class="btn-row" style="justify-content:center">
       <label class="btn" style="margin:0;color:var(--accent-ink)">
         Choisir un fichier
-        <input type="file" accept=".txt,.csv,.tsv,.dat,text/plain,text/csv" data-file />
+        <input type="file" accept=".txt,.csv,.tsv,.dat,.xml,text/plain,text/csv,application/xml,text/xml" data-file />
       </label>
       <button type="button" class="btn secondary" data-sample>Essayer avec un exemple</button>
     </div>

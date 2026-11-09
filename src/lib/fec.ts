@@ -8,6 +8,8 @@
  *  - montants : virgule décimale, pas de séparateur de milliers, signe à gauche ou à droite.
  */
 
+import { parseFecXml, type XmlStructureIssue } from './fec-xml';
+
 export const STANDARD_FIELDS = [
   'JournalCode', 'JournalLib', 'EcritureNum', 'EcritureDate', 'CompteNum', 'CompteLib',
   'CompAuxNum', 'CompAuxLib', 'PieceRef', 'PieceDate', 'EcritureLib', 'Debit', 'Credit',
@@ -56,6 +58,10 @@ export interface FecLine {
 
 export interface FileInfo {
   name?: string;
+  /** Format du fichier : texte délimité (le plus courant) ou XML. */
+  format: 'texte' | 'XML';
+  /** Date de clôture lue dans le XML (élément DateCloture). */
+  xmlClosingDate?: string;
   siren?: string;
   closingDate?: string;
   encoding: 'UTF-8' | 'ISO 8859-15';
@@ -78,7 +84,7 @@ export interface FormatIssue {
   line: number;
   field: string;
   value: string;
-  problem: 'date' | 'montant' | 'colonnes' | 'separateur-milliers' | 'point-decimal' | 'sens';
+  problem: 'date' | 'montant' | 'colonnes' | 'separateur-milliers' | 'point-decimal' | 'sens' | 'virgule-xml';
 }
 
 export interface ParsedFec {
@@ -87,6 +93,8 @@ export interface ParsedFec {
   formatIssues: FormatIssue[];
   /** Nombre total de problèmes de format (formatIssues est tronqué pour l'affichage). */
   formatIssueCount: Record<FormatIssue['problem'], number>;
+  /** Anomalies de structure propres au format XML. */
+  structure?: XmlStructureIssue[];
 }
 
 export class FecError extends Error {}
@@ -176,7 +184,8 @@ export function parseFec(input: Uint8Array | string, fileName?: string): ParsedF
   const { text, encoding, bom } = typeof input === 'string' ? { text: input.replace(/^﻿/, ''), encoding: 'UTF-8' as const, bom: input.startsWith('﻿') } : decode(input);
   if (!text.trim()) throw new FecError('Le fichier est vide.');
   if (/^\s*</.test(text)) {
-    throw new FecError('Ce fichier est au format XML. Le FEC XML existe mais il est rare ; seul le format « à plat » (texte délimité) est lu pour l’instant.');
+    const name = fileName ? parseFileName(fileName) : undefined;
+    return parseFecXml(text.trimStart(), { name: fileName, siren: name?.siren, closingDate: name?.closingDate, encoding, bom });
   }
 
   const lineEnding: FileInfo['lineEnding'] = text.includes('\r\n') ? 'CRLF' : text.includes('\n') ? 'LF' : 'CR';
@@ -227,7 +236,7 @@ export function parseFec(input: Uint8Array | string, fileName?: string): ParsedF
 
   const name = fileName ? parseFileName(fileName) : undefined;
   const formatIssues: FormatIssue[] = [];
-  const formatIssueCount: ParsedFec['formatIssueCount'] = { date: 0, montant: 0, colonnes: 0, 'separateur-milliers': 0, 'point-decimal': 0, sens: 0 };
+  const formatIssueCount: ParsedFec['formatIssueCount'] = { date: 0, montant: 0, colonnes: 0, 'separateur-milliers': 0, 'point-decimal': 0, sens: 0, 'virgule-xml': 0 };
   const issue = (i: FormatIssue) => {
     formatIssueCount[i.problem]++;
     if (formatIssues.length < MAX_KEPT_ISSUES) formatIssues.push(i);
@@ -305,6 +314,7 @@ export function parseFec(input: Uint8Array | string, fileName?: string): ParsedF
   return {
     info: {
       name: fileName,
+      format: 'texte',
       siren: name?.siren,
       closingDate: name?.closingDate,
       encoding,
