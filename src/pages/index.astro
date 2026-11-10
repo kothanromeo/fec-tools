@@ -27,6 +27,10 @@ const faq: FaqItem[] = [
     a: '<p>Oui, dans la limite de la mémoire de votre ordinateur. L’analyse se fait en arrière-plan sans figer la page : comptez quelques secondes pour 300 000 lignes. Seul l’affichage des écritures est limité à 500 lignes à la fois ; les exports contiennent tout.</p>',
   },
   {
+    q: 'Mon FEC est au format XML, est-il lu ?',
+    a: '<p>Oui. Le FEC XML, décrit par les schémas XSD de la DGFiP, est lu comme le format texte : mêmes contrôles de fond, même balance, même export Excel. Les règles propres au XML (dates AAAA-MM-JJ, point décimal, une ligne = un débit ou un crédit) sont vérifiées en plus. Voir <a href="' + href('/guides/fec-format-xml/') + '">le guide du FEC XML</a>.</p>',
+  },
+  {
     q: 'Les FEC des BNC et des exploitants agricoles sont-ils reconnus ?',
     a: '<p>Oui. L’outil détecte la variante : 18 champs standard, Montant et Sens au lieu de Débit et Crédit, 21 champs pour les bénéfices agricoles et 22 champs pour les BNC en comptabilité de trésorerie (date et mode de règlement, nature de l’opération, identifiant client).</p>',
   },
@@ -35,7 +39,7 @@ const faq: FaqItem[] = [
 <Base
   title="Lire et vérifier un FEC en ligne (Fichier des Écritures Comptables)"
   description="Ouvrez et contrôlez gratuitement un Fichier des Écritures Comptables : format A47 A-1, équilibre, numérotation, balance et export Excel. Votre comptabilité reste sur votre ordinateur."
-  keywords={["fec", "fichier des écritures comptables", "lire fichier fec", "ouvrir fec", "lecteur fec en ligne", "vérifier fec", "contrôle fec gratuit", "fec article a47 a-1", "fec contrôle fiscal", "fec excel", "balance fec", "analyse fec", "test compta démat en ligne"]}
+  keywords={["fec", "fichier des écritures comptables", "lire fichier fec", "ouvrir fec", "lecteur fec en ligne", "vérifier fec", "contrôle fec gratuit", "fec article a47 a-1", "fec contrôle fiscal", "fec excel", "balance fec", "analyse fec", "test compta démat en ligne", "fec xml"]}
   schema={[toolSchema(site, { name: 'Lecteur et validateur de FEC', path: '/', description: 'Lit et contrôle un Fichier des Écritures Comptables dans le navigateur.' }), faqSchema(faq)]}
 >
   <section class="hero wrap">
@@ -48,6 +52,7 @@ const faq: FaqItem[] = [
       <li>100 % dans le navigateur</li>
       <li>Article A. 47 A-1 du LPF</li>
       <li>BIC, IS, BNC, BA</li>
+      <li>Texte et XML</li>
       <li>Gratuit et open source</li>
     </ul>
   </section>

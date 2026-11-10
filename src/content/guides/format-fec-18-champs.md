@@ -29,7 +29,7 @@ Pas de tiret, pas d’espace, pas de « export_compta_final_v2 ». C’est aussi
 
 | Règle | Exigence |
 |---|---|
-| Type | Fichier « à plat », texte, à organisation séquentielle (le XML est aussi admis, mais rare) |
+| Type | Fichier « à plat », texte, à organisation séquentielle (le XML est aussi admis, mais rare : voir [le FEC au format XML](/guides/fec-format-xml/)) |
 | Première ligne | Les noms des champs |
 | Séparateur de champs | Tabulation ou caractère « \| » |
 | Fin de ligne | Retour chariot et/ou saut de ligne |
